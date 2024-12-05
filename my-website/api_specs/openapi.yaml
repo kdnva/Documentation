@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: LMS API
+  version: v1
+paths:
+  /auth/register:
+    post:
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Некорректные данные
+  /auth/login:
+    post:
+      summary: Вход в систему
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+      responses:
+        '200':
+          description: Пользователь успешно авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Неверный логин или пароль
+  /courses:
+    get:
+      summary: Получение списка курсов
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Количество курсов на странице
+      responses:
+        '200':
+          description: Список курсов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  courses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CourseResponse'
+                  total:
+                    type: integer
+  /courses/{courseId}:
+    get:
+      summary: Получение информации о курсе
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: integer
+          description: ID курса
+      responses:
+        '200':
+          description: Информация о курсе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseResponse'
+        '404':
+          description: Курс не найден
+    put:
+      summary: Обновление информации о курсе
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: integer
+          description: ID курса
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                task_id:
+                  type: integer
+      responses:
+        '200':
+          description: Курс успешно обновлен
+        '404':
+          description: Курс не найден
+  /instructor/courses:
+    get:
+      summary: Получение списка курсов преподавателя
+      responses:
+        '200':
+          description: Список курсов преподавателя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseResponse'
+  /student/progress/{courseId}:
+    get:
+      summary: Получение прогресса студента в курсе
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: integer
+          description: ID курса
+      responses:
+        '200':
+          description: Прогресс студента
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentProgressResponse'
+        '404':
+          description: Прогресс не найден
+
+components:
+  schemas:
+    UserRegistrationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [student, instructor, admin]
+    UserLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+    CourseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        instructor:
+          $ref: '#/components/schemas/UserResponse'
+    CourseUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        task_id:
+          type: integer
+    StudentProgressResponse:
+      type: object
+      properties:
+        courseId:
+          type: integer
+        completedModules:
+          type: array
+          items:
+            type: integer
+        overallProgress:
+          type: number
+          format: float
