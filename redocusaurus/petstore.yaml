@@ -144,7 +144,6 @@ paths:
                 $ref: '#/components/schemas/StudentProgressResponse'
         '404':
           description: Прогресс не найден
-
 components:
   schemas:
     UserRegistrationRequest:
@@ -161,7 +160,10 @@ components:
           type: string
         role:
           type: string
-          enum: [student, instructor, admin]
+          enum:
+            - student
+            - instructor
+            - admin
     UserLoginRequest:
       type: object
       properties:
